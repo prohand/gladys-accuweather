@@ -1,0 +1,1224 @@
+{
+  "manifest_version": 1,
+  "type": "weather",
+  "name": "AccuWeather",
+  "description": {
+    "en": "AccuWeather forecasts, alerts, scene triggers and dashboard widgets for Gladys.",
+    "fr": "Prévisions et alertes AccuWeather, déclencheurs de scènes et widgets pour Gladys.",
+    "de": "AccuWeather-Vorhersagen, Warnungen, Szenen-Auslöser und Widgets für Gladys.",
+    "es": "Previsiones y alertas de AccuWeather, disparadores de escenas y widgets para Gladys."
+  },
+  "version": "0.0.0",
+  "docker_image": "ghcr.io/prohand/gladys-accuweather:0.0.0",
+  "gladys_version": ">=5.1.0",
+  "cover_image": "https://raw.githubusercontent.com/prohand/gladys-accuweather/main/cover.png",
+  "categories": ["environment", "services"],
+  "transports": ["cloud"],
+  "location": true,
+  "config_schema": [
+    {
+      "key": "intro",
+      "type": "section",
+      "label": {
+        "en": "Getting started",
+        "fr": "Pour commencer",
+        "de": "Erste Schritte",
+        "es": "Primeros pasos"
+      },
+      "description": {
+        "en": "Create a free account on developer.accuweather.com, add an app, and paste its API key below. The weather is fetched for the position of your Gladys house: set it in Settings > Houses. Every refresh costs up to 4 AccuWeather requests: keep the interval at 120 minutes or more on a free key (50 requests a day).",
+        "fr": "Créez un compte gratuit sur developer.accuweather.com, ajoutez une application et collez sa clé d'API ci-dessous. La météo est demandée pour la position de votre maison Gladys : renseignez-la dans Paramètres > Maisons. Chaque rafraîchissement coûte jusqu'à 4 requêtes AccuWeather : gardez un intervalle de 120 minutes ou plus avec une clé gratuite (50 requêtes par jour).",
+        "de": "Erstelle ein kostenloses Konto auf developer.accuweather.com, lege eine App an und füge ihren API-Schlüssel unten ein. Das Wetter wird für die Position deines Gladys-Hauses abgefragt: Lege sie unter Einstellungen > Häuser fest. Jede Aktualisierung kostet bis zu 4 AccuWeather-Anfragen: Bleib mit einem kostenlosen Schlüssel bei 120 Minuten oder mehr (50 Anfragen pro Tag).",
+        "es": "Cree una cuenta gratuita en developer.accuweather.com, añada una aplicación y pegue su clave de API abajo. El tiempo se consulta para la ubicación de su casa en Gladys: indíquela en Ajustes > Casas. Cada actualización cuesta hasta 4 peticiones a AccuWeather: mantenga un intervalo de 120 minutos o más con una clave gratuita (50 peticiones al día)."
+      },
+      "links": [
+        {
+          "url": "https://developer.accuweather.com",
+          "label": {
+            "en": "AccuWeather developer portal",
+            "fr": "Portail développeur AccuWeather",
+            "de": "AccuWeather-Entwicklerportal",
+            "es": "Portal de desarrolladores de AccuWeather"
+          }
+        },
+        {
+          "url": "https://github.com/prohand/gladys-accuweather/blob/main/docs/en.md",
+          "label": {
+            "en": "Integration documentation",
+            "fr": "Documentation de l'intégration",
+            "de": "Dokumentation der Integration",
+            "es": "Documentación de la integración"
+          }
+        }
+      ]
+    },
+    {
+      "key": "api_key",
+      "type": "secret",
+      "label": {
+        "en": "API key",
+        "fr": "Clé d'API",
+        "de": "API-Schlüssel",
+        "es": "Clave de API"
+      },
+      "description": {
+        "en": "The key of your app on developer.accuweather.com (My Apps).",
+        "fr": "La clé de votre application sur developer.accuweather.com (My Apps).",
+        "de": "Der Schlüssel deiner App auf developer.accuweather.com (My Apps).",
+        "es": "La clave de su aplicación en developer.accuweather.com (My Apps)."
+      },
+      "placeholder": {
+        "en": "Paste your AccuWeather API key",
+        "fr": "Collez votre clé d'API AccuWeather",
+        "de": "AccuWeather-API-Schlüssel einfügen",
+        "es": "Pegue su clave de API de AccuWeather"
+      },
+      "required": true
+    },
+    {
+      "key": "language",
+      "type": "select",
+      "label": {
+        "en": "Language of AccuWeather texts",
+        "fr": "Langue des textes AccuWeather",
+        "de": "Sprache der AccuWeather-Texte",
+        "es": "Idioma de los textos de AccuWeather"
+      },
+      "description": {
+        "en": "Language of the alert names and of the weather phrases.",
+        "fr": "Langue des noms d'alertes et des descriptions du temps.",
+        "de": "Sprache der Warnungsnamen und der Wetterbeschreibungen.",
+        "es": "Idioma de los nombres de alertas y de las descripciones del tiempo."
+      },
+      "required": false,
+      "default": "en",
+      "options": [
+        {
+          "value": "en",
+          "label": {
+            "en": "English",
+            "fr": "Anglais",
+            "de": "Englisch",
+            "es": "Inglés"
+          }
+        },
+        {
+          "value": "fr",
+          "label": {
+            "en": "French",
+            "fr": "Français",
+            "de": "Französisch",
+            "es": "Francés"
+          }
+        },
+        {
+          "value": "de",
+          "label": {
+            "en": "German",
+            "fr": "Allemand",
+            "de": "Deutsch",
+            "es": "Alemán"
+          }
+        },
+        {
+          "value": "es",
+          "label": {
+            "en": "Spanish",
+            "fr": "Espagnol",
+            "de": "Spanisch",
+            "es": "Español"
+          }
+        }
+      ]
+    },
+    {
+      "key": "refresh_minutes",
+      "type": "number",
+      "label": {
+        "en": "Refresh interval (minutes)",
+        "fr": "Intervalle de rafraîchissement (minutes)",
+        "de": "Aktualisierungsintervall (Minuten)",
+        "es": "Intervalo de actualización (minutos)"
+      },
+      "description": {
+        "en": "How often AccuWeather is asked, 30 to 1440 minutes. At 120 minutes a day costs about 44 requests.",
+        "fr": "Fréquence des requêtes à AccuWeather, de 30 à 1440 minutes. À 120 minutes, une journée coûte environ 44 requêtes.",
+        "de": "Wie oft AccuWeather abgefragt wird, 30 bis 1440 Minuten. Bei 120 Minuten kostet ein Tag etwa 44 Anfragen.",
+        "es": "Frecuencia de las peticiones a AccuWeather, de 30 a 1440 minutos. Con 120 minutos, un día cuesta unas 44 peticiones."
+      },
+      "required": false,
+      "default": 120,
+      "min": 30,
+      "max": 1440
+    },
+    {
+      "key": "hourly_forecast",
+      "type": "boolean",
+      "label": {
+        "en": "Hourly forecast (12 hours)",
+        "fr": "Prévisions horaires (12 heures)",
+        "de": "Stündliche Vorhersage (12 Stunden)",
+        "es": "Previsión por horas (12 horas)"
+      },
+      "description": {
+        "en": "Needed by the \"Rain expected\" trigger and the curve of the widget. One request per refresh.",
+        "fr": "Nécessaire au déclencheur « Pluie attendue » et à la courbe du widget. Une requête par rafraîchissement.",
+        "de": "Nötig für den Auslöser „Regen erwartet“ und die Kurve des Widgets. Eine Anfrage pro Aktualisierung.",
+        "es": "Necesaria para el disparador «Lluvia prevista» y la curva del widget. Una petición por actualización."
+      },
+      "required": false,
+      "default": true
+    },
+    {
+      "key": "alerts",
+      "type": "boolean",
+      "label": {
+        "en": "Severe weather alerts",
+        "fr": "Alertes météo",
+        "de": "Unwetterwarnungen",
+        "es": "Alertas meteorológicas"
+      },
+      "description": {
+        "en": "Official alerts relayed by AccuWeather (not in every plan). One request per refresh.",
+        "fr": "Alertes officielles relayées par AccuWeather (pas dans toutes les offres). Une requête par rafraîchissement.",
+        "de": "Von AccuWeather weitergegebene amtliche Warnungen (nicht in jedem Tarif). Eine Anfrage pro Aktualisierung.",
+        "es": "Alertas oficiales difundidas por AccuWeather (no en todos los planes). Una petición por actualización."
+      },
+      "required": false,
+      "default": true
+    },
+    {
+      "key": "location_key",
+      "type": "string",
+      "label": {
+        "en": "AccuWeather location key (optional)",
+        "fr": "Clé de lieu AccuWeather (facultatif)",
+        "de": "AccuWeather-Ortsschlüssel (optional)",
+        "es": "Clave de ubicación AccuWeather (opcional)"
+      },
+      "description": {
+        "en": "Leave empty to use the position of your house. Fill it in (e.g. 623 for Paris) to force another AccuWeather location.",
+        "fr": "Laissez vide pour utiliser la position de votre maison. Renseignez-la (ex. 623 pour Paris) pour imposer un autre lieu AccuWeather.",
+        "de": "Leer lassen, um die Position deines Hauses zu verwenden. Ausfüllen (z. B. 623 für Paris), um einen anderen AccuWeather-Ort zu erzwingen.",
+        "es": "Déjela vacía para usar la ubicación de su casa. Rellénela (p. ej. 623 para París) para imponer otra ubicación de AccuWeather."
+      },
+      "placeholder": {
+        "en": "e.g. 623",
+        "fr": "ex. 623",
+        "de": "z. B. 623",
+        "es": "p. ej. 623"
+      },
+      "required": false
+    }
+  ],
+  "actions": [
+    {
+      "key": "test_connection",
+      "label": {
+        "en": "Test the connection",
+        "fr": "Tester la connexion",
+        "de": "Verbindung testen",
+        "es": "Probar la conexión"
+      },
+      "timeout_seconds": 30
+    },
+    {
+      "key": "refresh_now",
+      "label": {
+        "en": "Refresh the weather now",
+        "fr": "Actualiser la météo maintenant",
+        "de": "Wetter jetzt aktualisieren",
+        "es": "Actualizar el tiempo ahora"
+      },
+      "timeout_seconds": 30
+    }
+  ],
+  "scene_triggers": [
+    {
+      "key": "weather_alert",
+      "label": {
+        "en": "AccuWeather: new weather alert",
+        "fr": "AccuWeather : nouvelle alerte météo",
+        "de": "AccuWeather: neue Unwetterwarnung",
+        "es": "AccuWeather: nueva alerta meteorológica"
+      },
+      "description": {
+        "en": "An official alert was issued for your house. Fires once per alert.",
+        "fr": "Une alerte officielle a été émise pour votre maison. Se déclenche une fois par alerte.",
+        "de": "Für dein Haus wurde eine amtliche Warnung ausgegeben. Löst einmal pro Warnung aus.",
+        "es": "Se ha emitido una alerta oficial para su casa. Se activa una vez por alerta."
+      },
+      "fields": [
+        {
+          "key": "severity",
+          "type": "multi_select",
+          "label": {
+            "en": "Severity",
+            "fr": "Gravité",
+            "de": "Schweregrad",
+            "es": "Gravedad"
+          },
+          "options": [
+            {
+              "value": "minor",
+              "label": {
+                "en": "Minor (green)",
+                "fr": "Mineure (vert)",
+                "de": "Gering (grün)",
+                "es": "Menor (verde)"
+              }
+            },
+            {
+              "value": "moderate",
+              "label": {
+                "en": "Moderate (yellow)",
+                "fr": "Modérée (jaune)",
+                "de": "Mäßig (gelb)",
+                "es": "Moderada (amarillo)"
+              }
+            },
+            {
+              "value": "severe",
+              "label": {
+                "en": "Severe (orange)",
+                "fr": "Sévère (orange)",
+                "de": "Schwer (orange)",
+                "es": "Grave (naranja)"
+              }
+            },
+            {
+              "value": "extreme",
+              "label": {
+                "en": "Extreme (red)",
+                "fr": "Extrême (rouge)",
+                "de": "Extrem (rot)",
+                "es": "Extrema (rojo)"
+              }
+            }
+          ]
+        },
+        {
+          "key": "type",
+          "type": "multi_select",
+          "label": {
+            "en": "Phenomenon",
+            "fr": "Phénomène",
+            "de": "Phänomen",
+            "es": "Fenómeno"
+          },
+          "options": [
+            {
+              "value": "wind",
+              "label": {
+                "en": "Wind",
+                "fr": "Vent",
+                "de": "Wind",
+                "es": "Viento"
+              }
+            },
+            {
+              "value": "rain",
+              "label": {
+                "en": "Rain",
+                "fr": "Pluie",
+                "de": "Regen",
+                "es": "Lluvia"
+              }
+            },
+            {
+              "value": "flood",
+              "label": {
+                "en": "Flood",
+                "fr": "Inondation",
+                "de": "Hochwasser",
+                "es": "Inundación"
+              }
+            },
+            {
+              "value": "thunderstorm",
+              "label": {
+                "en": "Thunderstorm",
+                "fr": "Orages",
+                "de": "Gewitter",
+                "es": "Tormentas"
+              }
+            },
+            {
+              "value": "snow",
+              "label": {
+                "en": "Snow and ice",
+                "fr": "Neige et verglas",
+                "de": "Schnee und Glätte",
+                "es": "Nieve y hielo"
+              }
+            },
+            {
+              "value": "heat",
+              "label": {
+                "en": "Heat",
+                "fr": "Canicule",
+                "de": "Hitze",
+                "es": "Calor"
+              }
+            },
+            {
+              "value": "cold",
+              "label": {
+                "en": "Cold",
+                "fr": "Grand froid",
+                "de": "Kälte",
+                "es": "Frío"
+              }
+            },
+            {
+              "value": "avalanche",
+              "label": {
+                "en": "Avalanche",
+                "fr": "Avalanches",
+                "de": "Lawinen",
+                "es": "Aludes"
+              }
+            },
+            {
+              "value": "coastal",
+              "label": {
+                "en": "Coastal",
+                "fr": "Vagues-submersion",
+                "de": "Küste",
+                "es": "Costero"
+              }
+            },
+            {
+              "value": "fog",
+              "label": {
+                "en": "Fog",
+                "fr": "Brouillard",
+                "de": "Nebel",
+                "es": "Niebla"
+              }
+            },
+            {
+              "value": "other",
+              "label": {
+                "en": "Other",
+                "fr": "Autre",
+                "de": "Sonstige",
+                "es": "Otra"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "event",
+          "type": "string",
+          "label": {
+            "en": "Alert name",
+            "fr": "Nom de l'alerte",
+            "de": "Name der Warnung",
+            "es": "Nombre de la alerta"
+          }
+        },
+        {
+          "key": "severity",
+          "type": "string",
+          "label": {
+            "en": "Severity",
+            "fr": "Gravité",
+            "de": "Schweregrad",
+            "es": "Gravedad"
+          }
+        },
+        {
+          "key": "type",
+          "type": "string",
+          "label": {
+            "en": "Phenomenon",
+            "fr": "Phénomène",
+            "de": "Phänomen",
+            "es": "Fenómeno"
+          }
+        },
+        {
+          "key": "description",
+          "type": "string",
+          "label": {
+            "en": "Description",
+            "fr": "Description",
+            "de": "Beschreibung",
+            "es": "Descripción"
+          }
+        },
+        {
+          "key": "starts_at",
+          "type": "string",
+          "label": {
+            "en": "Start",
+            "fr": "Début",
+            "de": "Beginn",
+            "es": "Inicio"
+          }
+        },
+        {
+          "key": "ends_at",
+          "type": "string",
+          "label": {
+            "en": "End",
+            "fr": "Fin",
+            "de": "Ende",
+            "es": "Fin"
+          }
+        },
+        {
+          "key": "location",
+          "type": "string",
+          "label": {
+            "en": "Location",
+            "fr": "Lieu",
+            "de": "Ort",
+            "es": "Ubicación"
+          }
+        }
+      ]
+    },
+    {
+      "key": "condition_changed",
+      "label": {
+        "en": "AccuWeather: the sky changed",
+        "fr": "AccuWeather : le ciel a changé",
+        "de": "AccuWeather: der Himmel hat sich geändert",
+        "es": "AccuWeather: el cielo ha cambiado"
+      },
+      "description": {
+        "en": "The current conditions changed (clear to rain, cloud to snow...).",
+        "fr": "Les conditions actuelles ont changé (dégagé vers pluie, nuageux vers neige...).",
+        "de": "Die aktuellen Bedingungen haben sich geändert (klar zu Regen, bewölkt zu Schnee...).",
+        "es": "Las condiciones actuales han cambiado (despejado a lluvia, nublado a nieve...)."
+      },
+      "fields": [
+        {
+          "key": "condition",
+          "type": "multi_select",
+          "label": {
+            "en": "New condition",
+            "fr": "Nouvelle condition",
+            "de": "Neue Bedingung",
+            "es": "Nueva condición"
+          },
+          "options": [
+            {
+              "value": "clear",
+              "label": {
+                "en": "Clear",
+                "fr": "Dégagé",
+                "de": "Klar",
+                "es": "Despejado"
+              }
+            },
+            {
+              "value": "partly-cloudy",
+              "label": {
+                "en": "Partly cloudy",
+                "fr": "Éclaircies",
+                "de": "Teilweise bewölkt",
+                "es": "Parcialmente nublado"
+              }
+            },
+            {
+              "value": "cloud",
+              "label": {
+                "en": "Cloudy",
+                "fr": "Nuageux",
+                "de": "Bewölkt",
+                "es": "Nublado"
+              }
+            },
+            {
+              "value": "fog",
+              "label": {
+                "en": "Fog",
+                "fr": "Brouillard",
+                "de": "Nebel",
+                "es": "Niebla"
+              }
+            },
+            {
+              "value": "rain",
+              "label": {
+                "en": "Rain",
+                "fr": "Pluie",
+                "de": "Regen",
+                "es": "Lluvia"
+              }
+            },
+            {
+              "value": "sleet",
+              "label": {
+                "en": "Sleet",
+                "fr": "Neige fondue",
+                "de": "Schneeregen",
+                "es": "Aguanieve"
+              }
+            },
+            {
+              "value": "freezing-rain",
+              "label": {
+                "en": "Freezing rain",
+                "fr": "Pluie verglaçante",
+                "de": "Gefrierender Regen",
+                "es": "Lluvia helada"
+              }
+            },
+            {
+              "value": "snow",
+              "label": {
+                "en": "Snow",
+                "fr": "Neige",
+                "de": "Schnee",
+                "es": "Nieve"
+              }
+            },
+            {
+              "value": "thunderstorm",
+              "label": {
+                "en": "Thunderstorm",
+                "fr": "Orage",
+                "de": "Gewitter",
+                "es": "Tormenta"
+              }
+            },
+            {
+              "value": "wind",
+              "label": {
+                "en": "Windy",
+                "fr": "Vent fort",
+                "de": "Windig",
+                "es": "Ventoso"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "condition",
+          "type": "string",
+          "label": {
+            "en": "New condition",
+            "fr": "Nouvelle condition",
+            "de": "Neue Bedingung",
+            "es": "Nueva condición"
+          }
+        },
+        {
+          "key": "previous_condition",
+          "type": "string",
+          "label": {
+            "en": "Previous condition",
+            "fr": "Condition précédente",
+            "de": "Vorherige Bedingung",
+            "es": "Condición anterior"
+          }
+        },
+        {
+          "key": "description",
+          "type": "string",
+          "label": {
+            "en": "AccuWeather phrase",
+            "fr": "Phrase AccuWeather",
+            "de": "AccuWeather-Beschreibung",
+            "es": "Frase de AccuWeather"
+          }
+        },
+        {
+          "key": "temperature",
+          "type": "number",
+          "label": {
+            "en": "Temperature (°C)",
+            "fr": "Température (°C)",
+            "de": "Temperatur (°C)",
+            "es": "Temperatura (°C)"
+          }
+        },
+        {
+          "key": "location",
+          "type": "string",
+          "label": {
+            "en": "Location",
+            "fr": "Lieu",
+            "de": "Ort",
+            "es": "Ubicación"
+          }
+        }
+      ]
+    },
+    {
+      "key": "rain_expected",
+      "label": {
+        "en": "AccuWeather: rain expected",
+        "fr": "AccuWeather : pluie attendue",
+        "de": "AccuWeather: Regen erwartet",
+        "es": "AccuWeather: lluvia prevista"
+      },
+      "description": {
+        "en": "Precipitation is forecast within 3 hours, where none was before. Needs the hourly forecast.",
+        "fr": "Des précipitations sont prévues d'ici 3 heures, alors qu'il n'y en avait pas. Demande les prévisions horaires.",
+        "de": "Niederschlag ist innerhalb von 3 Stunden vorhergesagt, vorher keiner. Braucht die stündliche Vorhersage.",
+        "es": "Se prevé precipitación en las próximas 3 horas, antes no. Requiere la previsión por horas."
+      },
+      "fields": [
+        {
+          "key": "precipitation_type",
+          "type": "multi_select",
+          "label": {
+            "en": "Precipitation",
+            "fr": "Précipitations",
+            "de": "Niederschlag",
+            "es": "Precipitación"
+          },
+          "options": [
+            {
+              "value": "rain",
+              "label": {
+                "en": "Rain",
+                "fr": "Pluie",
+                "de": "Regen",
+                "es": "Lluvia"
+              }
+            },
+            {
+              "value": "snow",
+              "label": {
+                "en": "Snow",
+                "fr": "Neige",
+                "de": "Schnee",
+                "es": "Nieve"
+              }
+            },
+            {
+              "value": "ice",
+              "label": {
+                "en": "Ice",
+                "fr": "Glace",
+                "de": "Eis",
+                "es": "Hielo"
+              }
+            },
+            {
+              "value": "mixed",
+              "label": {
+                "en": "Mixed",
+                "fr": "Mixte",
+                "de": "Gemischt",
+                "es": "Mixta"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "precipitation_type",
+          "type": "string",
+          "label": {
+            "en": "Precipitation",
+            "fr": "Précipitations",
+            "de": "Niederschlag",
+            "es": "Precipitación"
+          }
+        },
+        {
+          "key": "starts_at",
+          "type": "string",
+          "label": {
+            "en": "Expected at",
+            "fr": "Attendue à",
+            "de": "Erwartet um",
+            "es": "Prevista a las"
+          }
+        },
+        {
+          "key": "hours_until",
+          "type": "number",
+          "label": {
+            "en": "Hours until it starts",
+            "fr": "Heures avant le début",
+            "de": "Stunden bis zum Beginn",
+            "es": "Horas hasta el inicio"
+          }
+        },
+        {
+          "key": "probability",
+          "type": "number",
+          "label": {
+            "en": "Probability (%)",
+            "fr": "Probabilité (%)",
+            "de": "Wahrscheinlichkeit (%)",
+            "es": "Probabilidad (%)"
+          }
+        },
+        {
+          "key": "location",
+          "type": "string",
+          "label": {
+            "en": "Location",
+            "fr": "Lieu",
+            "de": "Ort",
+            "es": "Ubicación"
+          }
+        }
+      ]
+    },
+    {
+      "key": "frost_expected",
+      "label": {
+        "en": "AccuWeather: frost expected",
+        "fr": "AccuWeather : gel attendu",
+        "de": "AccuWeather: Frost erwartet",
+        "es": "AccuWeather: helada prevista"
+      },
+      "description": {
+        "en": "A forecast day goes down to 0 °C or below. Fires once per day forecast.",
+        "fr": "Un jour prévu descend à 0 °C ou moins. Se déclenche une fois par jour prévu.",
+        "de": "Ein vorhergesagter Tag fällt auf 0 °C oder darunter. Löst einmal pro Tag aus.",
+        "es": "Un día previsto baja a 0 °C o menos. Se activa una vez por día previsto."
+      },
+      "variables": [
+        {
+          "key": "date",
+          "type": "string",
+          "label": {
+            "en": "Date",
+            "fr": "Date",
+            "de": "Datum",
+            "es": "Fecha"
+          }
+        },
+        {
+          "key": "temperature_min",
+          "type": "number",
+          "label": {
+            "en": "Minimum (°C)",
+            "fr": "Minimum (°C)",
+            "de": "Minimum (°C)",
+            "es": "Mínima (°C)"
+          }
+        },
+        {
+          "key": "location",
+          "type": "string",
+          "label": {
+            "en": "Location",
+            "fr": "Lieu",
+            "de": "Ort",
+            "es": "Ubicación"
+          }
+        }
+      ]
+    }
+  ],
+  "scene_actions": [
+    {
+      "key": "get_forecast",
+      "label": {
+        "en": "AccuWeather: read the forecast",
+        "fr": "AccuWeather : lire les prévisions",
+        "de": "AccuWeather: Vorhersage lesen",
+        "es": "AccuWeather: leer la previsión"
+      },
+      "description": {
+        "en": "Today's, tomorrow's or the day after's forecast, for the next actions.",
+        "fr": "Les prévisions du jour, de demain ou d'après-demain, pour les actions suivantes.",
+        "de": "Die Vorhersage für heute, morgen oder übermorgen, für die nächsten Aktionen.",
+        "es": "La previsión de hoy, mañana o pasado mañana, para las acciones siguientes."
+      },
+      "timeout_seconds": 20,
+      "fields": [
+        {
+          "key": "day",
+          "type": "select",
+          "label": {
+            "en": "Day",
+            "fr": "Jour",
+            "de": "Tag",
+            "es": "Día"
+          },
+          "required": false,
+          "default": "today",
+          "options": [
+            {
+              "value": "today",
+              "label": {
+                "en": "Today",
+                "fr": "Aujourd'hui",
+                "de": "Heute",
+                "es": "Hoy"
+              }
+            },
+            {
+              "value": "tomorrow",
+              "label": {
+                "en": "Tomorrow",
+                "fr": "Demain",
+                "de": "Morgen",
+                "es": "Mañana"
+              }
+            },
+            {
+              "value": "day_after",
+              "label": {
+                "en": "Day after tomorrow",
+                "fr": "Après-demain",
+                "de": "Übermorgen",
+                "es": "Pasado mañana"
+              }
+            }
+          ]
+        },
+        {
+          "key": "units",
+          "type": "select",
+          "label": {
+            "en": "Units",
+            "fr": "Unités",
+            "de": "Einheiten",
+            "es": "Unidades"
+          },
+          "required": false,
+          "default": "metric",
+          "options": [
+            {
+              "value": "metric",
+              "label": {
+                "en": "Metric (°C, m/s)",
+                "fr": "Métrique (°C, m/s)",
+                "de": "Metrisch (°C, m/s)",
+                "es": "Métrico (°C, m/s)"
+              }
+            },
+            {
+              "value": "us",
+              "label": {
+                "en": "US (°F, mph)",
+                "fr": "US (°F, mph)",
+                "de": "US (°F, mph)",
+                "es": "EE. UU. (°F, mph)"
+              }
+            }
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "key": "condition",
+          "type": "string",
+          "label": {
+            "en": "Condition",
+            "fr": "Condition",
+            "de": "Bedingung",
+            "es": "Condición"
+          }
+        },
+        {
+          "key": "description",
+          "type": "string",
+          "label": {
+            "en": "AccuWeather phrase",
+            "fr": "Phrase AccuWeather",
+            "de": "AccuWeather-Beschreibung",
+            "es": "Frase de AccuWeather"
+          }
+        },
+        {
+          "key": "temperature_min",
+          "type": "number",
+          "label": {
+            "en": "Minimum temperature",
+            "fr": "Température minimale",
+            "de": "Tiefsttemperatur",
+            "es": "Temperatura mínima"
+          }
+        },
+        {
+          "key": "temperature_max",
+          "type": "number",
+          "label": {
+            "en": "Maximum temperature",
+            "fr": "Température maximale",
+            "de": "Höchsttemperatur",
+            "es": "Temperatura máxima"
+          }
+        },
+        {
+          "key": "precipitation_probability",
+          "type": "number",
+          "label": {
+            "en": "Precipitation probability (%)",
+            "fr": "Probabilité de précipitations (%)",
+            "de": "Niederschlagswahrscheinlichkeit (%)",
+            "es": "Probabilidad de precipitación (%)"
+          }
+        },
+        {
+          "key": "rain_expected",
+          "type": "boolean",
+          "label": {
+            "en": "Precipitation expected",
+            "fr": "Précipitations prévues",
+            "de": "Niederschlag erwartet",
+            "es": "Precipitación prevista"
+          }
+        },
+        {
+          "key": "wind_speed",
+          "type": "number",
+          "label": {
+            "en": "Wind speed",
+            "fr": "Vitesse du vent",
+            "de": "Windgeschwindigkeit",
+            "es": "Velocidad del viento"
+          }
+        },
+        {
+          "key": "uv_index",
+          "type": "number",
+          "label": {
+            "en": "UV index",
+            "fr": "Indice UV",
+            "de": "UV-Index",
+            "es": "Índice UV"
+          }
+        }
+      ]
+    },
+    {
+      "key": "get_current_conditions",
+      "label": {
+        "en": "AccuWeather: read the current weather",
+        "fr": "AccuWeather : lire la météo actuelle",
+        "de": "AccuWeather: aktuelles Wetter lesen",
+        "es": "AccuWeather: leer el tiempo actual"
+      },
+      "description": {
+        "en": "The weather right now at your house, for the next actions.",
+        "fr": "La météo en ce moment à votre maison, pour les actions suivantes.",
+        "de": "Das Wetter gerade an deinem Haus, für die nächsten Aktionen.",
+        "es": "El tiempo ahora mismo en su casa, para las acciones siguientes."
+      },
+      "timeout_seconds": 20,
+      "fields": [
+        {
+          "key": "units",
+          "type": "select",
+          "label": {
+            "en": "Units",
+            "fr": "Unités",
+            "de": "Einheiten",
+            "es": "Unidades"
+          },
+          "required": false,
+          "default": "metric",
+          "options": [
+            {
+              "value": "metric",
+              "label": {
+                "en": "Metric (°C, m/s)",
+                "fr": "Métrique (°C, m/s)",
+                "de": "Metrisch (°C, m/s)",
+                "es": "Métrico (°C, m/s)"
+              }
+            },
+            {
+              "value": "us",
+              "label": {
+                "en": "US (°F, mph)",
+                "fr": "US (°F, mph)",
+                "de": "US (°F, mph)",
+                "es": "EE. UU. (°F, mph)"
+              }
+            }
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "key": "condition",
+          "type": "string",
+          "label": {
+            "en": "Condition",
+            "fr": "Condition",
+            "de": "Bedingung",
+            "es": "Condición"
+          }
+        },
+        {
+          "key": "description",
+          "type": "string",
+          "label": {
+            "en": "AccuWeather phrase",
+            "fr": "Phrase AccuWeather",
+            "de": "AccuWeather-Beschreibung",
+            "es": "Frase de AccuWeather"
+          }
+        },
+        {
+          "key": "temperature",
+          "type": "number",
+          "label": {
+            "en": "Temperature",
+            "fr": "Température",
+            "de": "Temperatur",
+            "es": "Temperatura"
+          }
+        },
+        {
+          "key": "apparent_temperature",
+          "type": "number",
+          "label": {
+            "en": "Feels like",
+            "fr": "Température ressentie",
+            "de": "Gefühlte Temperatur",
+            "es": "Sensación térmica"
+          }
+        },
+        {
+          "key": "humidity",
+          "type": "number",
+          "label": {
+            "en": "Humidity (%)",
+            "fr": "Humidité (%)",
+            "de": "Luftfeuchtigkeit (%)",
+            "es": "Humedad (%)"
+          }
+        },
+        {
+          "key": "wind_speed",
+          "type": "number",
+          "label": {
+            "en": "Wind speed",
+            "fr": "Vitesse du vent",
+            "de": "Windgeschwindigkeit",
+            "es": "Velocidad del viento"
+          }
+        },
+        {
+          "key": "uv_index",
+          "type": "number",
+          "label": {
+            "en": "UV index",
+            "fr": "Indice UV",
+            "de": "UV-Index",
+            "es": "Índice UV"
+          }
+        },
+        {
+          "key": "is_day",
+          "type": "boolean",
+          "label": {
+            "en": "Daytime",
+            "fr": "Il fait jour",
+            "de": "Tag",
+            "es": "Es de día"
+          }
+        }
+      ]
+    },
+    {
+      "key": "refresh_weather",
+      "label": {
+        "en": "AccuWeather: refresh now",
+        "fr": "AccuWeather : actualiser maintenant",
+        "de": "AccuWeather: jetzt aktualisieren",
+        "es": "AccuWeather: actualizar ahora"
+      },
+      "description": {
+        "en": "Ask AccuWeather now (at most once every 5 minutes). Costs up to 4 requests.",
+        "fr": "Interroge AccuWeather maintenant (au plus toutes les 5 minutes). Coûte jusqu'à 4 requêtes.",
+        "de": "Fragt AccuWeather jetzt ab (höchstens alle 5 Minuten). Kostet bis zu 4 Anfragen.",
+        "es": "Consulta AccuWeather ahora (como mucho cada 5 minutos). Cuesta hasta 4 peticiones."
+      },
+      "timeout_seconds": 30,
+      "outputs": [
+        {
+          "key": "refreshed",
+          "type": "boolean",
+          "label": {
+            "en": "Refreshed",
+            "fr": "Actualisée",
+            "de": "Aktualisiert",
+            "es": "Actualizado"
+          }
+        },
+        {
+          "key": "calls_last_24h",
+          "type": "number",
+          "label": {
+            "en": "Requests over 24 h",
+            "fr": "Requêtes sur 24 h",
+            "de": "Anfragen in 24 Std.",
+            "es": "Peticiones en 24 h"
+          }
+        }
+      ]
+    }
+  ],
+  "widgets": [
+    {
+      "key": "accuweather_now",
+      "label": {
+        "en": "AccuWeather now",
+        "fr": "AccuWeather en direct",
+        "de": "AccuWeather aktuell",
+        "es": "AccuWeather ahora"
+      },
+      "description": {
+        "en": "Feels-like, wind, the next 12 hours, alerts, rain to come and requests used.",
+        "fr": "Ressenti, vent, les 12 prochaines heures, alertes, pluie à venir et requêtes.",
+        "de": "Gefühlt, Wind, die nächsten 12 Stunden, Warnungen, Regen und Anfragen.",
+        "es": "Sensación, viento, las próximas 12 horas, alertas, lluvia y peticiones."
+      },
+      "icon": "sun",
+      "action_timeout_seconds": 30
+    },
+    {
+      "key": "accuweather_forecast",
+      "label": {
+        "en": "AccuWeather 5 days",
+        "fr": "AccuWeather 5 jours",
+        "de": "AccuWeather 5 Tage",
+        "es": "AccuWeather 5 días"
+      },
+      "description": {
+        "en": "The next days with AccuWeather's own words, day and night.",
+        "fr": "Les prochains jours avec les mots d'AccuWeather, de jour et de nuit.",
+        "de": "Die nächsten Tage mit den Worten von AccuWeather, Tag und Nacht.",
+        "es": "Los próximos días con las palabras de AccuWeather, de día y de noche."
+      },
+      "icon": "calendar",
+      "settings": [
+        {
+          "key": "days",
+          "type": "number",
+          "label": {
+            "en": "Days shown",
+            "fr": "Jours affichés",
+            "de": "Angezeigte Tage",
+            "es": "Días mostrados"
+          },
+          "description": {
+            "en": "1 to 5.",
+            "fr": "De 1 à 5.",
+            "de": "1 bis 5.",
+            "es": "De 1 a 5."
+          },
+          "required": false,
+          "default": 5,
+          "min": 1,
+          "max": 5
+        }
+      ],
+      "action_timeout_seconds": 30
+    }
+  ]
+}

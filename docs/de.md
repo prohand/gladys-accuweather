@@ -1,0 +1,142 @@
+# AccuWeather
+
+Diese Integration macht [AccuWeather](https://www.accuweather.com) zum
+Wetteranbieter von Gladys: Das Wetter-Widget von Gladys, der Chat-Assistent
+und die Wetterwarnungen nutzen es anstelle des integrierten
+OpenWeather-Dienstes. Sie fügt außerdem AccuWeather-Szenen-Auslöser,
+Szenen-Aktionen und zwei Dashboard-Widgets hinzu (Gladys 5.1 oder neuer).
+
+Es ist eine **Cloud**-Integration: Sie braucht einen Internetzugang und einen
+AccuWeather-API-Schlüssel. In deinem lokalen Netzwerk läuft nichts.
+
+## Bevor du beginnst
+
+1. Erstelle ein kostenloses Konto auf
+   [developer.accuweather.com](https://developer.accuweather.com).
+2. Lege unter **My Apps** eine App an (beliebiger Name) und kopiere ihren
+   **API-Schlüssel** (API key).
+3. Prüfe in Gladys, dass dein Haus eine Position hat: **Einstellungen >
+   Häuser**, dann das Haus auf der Karte platzieren. Bei der Installation
+   bittet die Integration darum, die Position deiner Häuser zu lesen: Sie
+   verwendet das erste Haus, das eine hat.
+
+## Konfiguration
+
+Öffne den Reiter **Konfiguration** der Integration:
+
+| Feld                               | Wozu                                                                                                                                                        |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| API-Schlüssel                      | Der Schlüssel deiner AccuWeather-App. Pflichtfeld.                                                                                                          |
+| Sprache der AccuWeather-Texte      | Sprache der Warnungsnamen und der Wetterbeschreibungen („Teilweise sonnig“…). Englisch, Französisch, Deutsch oder Spanisch.                                 |
+| Aktualisierungsintervall (Minuten) | Wie oft AccuWeather abgefragt wird, 30 bis 1440 Minuten. Standard: 120.                                                                                     |
+| Stündliche Vorhersage (12 Stunden) | Die nächsten 12 Stunden. Nötig für den Auslöser „Regen erwartet“ und die Kurve des Widgets.                                                                 |
+| Unwetterwarnungen                  | Von AccuWeather weitergegebene amtliche Warnungen. Nicht in jedem Tarif enthalten: Lehnt dein Tarif sie ab, fragt die Integration nicht mehr danach.        |
+| AccuWeather-Ortsschlüssel          | Optional. Leer lassen, um die Position deines Hauses zu verwenden. Ausfüllen (zum Beispiel `623` für Paris), um einen anderen AccuWeather-Ort zu erzwingen. |
+
+Speichere und klicke dann auf **Verbindung testen**: Angezeigt werden der
+gefundene AccuWeather-Ort, das aktuelle Wetter und wie viele Anfragen deine
+Einstellungen pro Tag kosten.
+
+### Dein Tageskontingent
+
+AccuWeather zählt jede Anfrage. Die ältesten kostenlosen Schlüssel erlauben
+**50 Anfragen pro Tag**; die Testphase und die bezahlten Tarife erlauben
+mehr. Eine Aktualisierung kostet:
+
+- 1 Anfrage für die aktuellen Bedingungen;
+- 1 für die 12-Stunden-Vorhersage (wenn eingeschaltet);
+- 1 für die Warnungen (wenn eingeschaltet);
+- 1 für die 5-Tage-Vorhersage, höchstens alle 3 Stunden.
+
+Bei 120 Minuten (Standard) sind das etwa **44 Anfragen pro Tag**. Jede
+Antwort wird zwischengespeichert, auch über Neustarts hinweg: Ein Dashboard
+öffnen, die Wetterabfragen von Gladys (alle 30 Minuten) und Szenen kosten
+keine zusätzlichen Anfragen. Nur die **Aktualisieren**-Schaltflächen und die
+Szenen-Aktion `refresh_weather` fragen AccuWeather sofort ab (höchstens
+einmal alle 5 Minuten).
+
+Ist das Kontingent aufgebraucht, zeigt die Integration weiter das zuletzt
+empfangene Wetter an (bis zu 24 Stunden alt) und wartet eine Stunde, bevor
+sie erneut fragt.
+
+## Aktionen der Konfigurationsseite
+
+- **Verbindung testen** — prüft Schlüssel und Ort und zeigt die Zahl der
+  Anfragen der letzten 24 Stunden.
+- **Wetter jetzt aktualisieren** — fragt AccuWeather sofort ab.
+
+## Szenen
+
+Die Integration fügt dem Szenen-Editor eigene Karten hinzu, in der Kategorie
+**Integrationen**.
+
+### Auslöser
+
+Jeder Auslöser löst **einmal pro Änderung** aus, nie bei jeder
+Aktualisierung. Die erste Aktualisierung nach der Installation merkt sich nur
+die aktuelle Lage.
+
+- **AccuWeather: neue Unwetterwarnung** (`weather_alert`) — für dein Haus wurde
+  eine amtliche Warnung ausgegeben. Filter nach Schweregrad (gering, mäßig,
+  schwer, extrem) und Phänomen (Wind, Regen, Gewitter, Schnee und Glätte…).
+  Variablen: `{{triggerEvent.data.event}}` (Name der Warnung), `severity`,
+  `type`, `description`, `starts_at`, `ends_at`, `location`.
+- **AccuWeather: der Himmel hat sich geändert** (`condition_changed`) — die
+  aktuellen Bedingungen haben sich geändert, zum Beispiel von klar zu Regen.
+  Filter nach der neuen Bedingung. Variablen: `condition`,
+  `previous_condition`, `description`, `temperature` (°C), `location`.
+- **AccuWeather: Regen erwartet** (`rain_expected`) — Niederschlag ist in den
+  nächsten 3 Stunden vorhergesagt, bei der vorherigen Aktualisierung keiner.
+  Braucht die stündliche Vorhersage. Filter nach Regen, Schnee, Eis oder
+  gemischt. Variablen: `precipitation_type`, `starts_at`, `hours_until`,
+  `probability`, `location`.
+- **AccuWeather: Frost erwartet** (`frost_expected`) — ein vorhergesagter Tag
+  fällt auf 0 °C oder darunter. Einmal pro Tag. Variablen: `date`,
+  `temperature_min` (°C), `location`.
+
+Gladys hat auch einen eigenen Auslöser „Wetterwarnung“: Er funktioniert mit
+dieser Integration und reagiert innerhalb von Sekunden, wenn AccuWeather eine
+Warnung veröffentlicht oder beendet.
+
+### Aktionen
+
+- **AccuWeather: Vorhersage lesen** (`get_forecast`) — heute, morgen oder
+  übermorgen. Gibt `condition`, `description`, `temperature_min`,
+  `temperature_max`, `precipitation_probability`, `rain_expected`,
+  `wind_speed` und `uv_index` an die nächsten Aktionen weiter. Beispiel:
+  „wenn `rain_expected` wahr ist, schick mir eine Nachricht“.
+- **AccuWeather: aktuelles Wetter lesen** (`get_current_conditions`) — gibt
+  `condition`, `description`, `temperature`, `apparent_temperature`,
+  `humidity`, `wind_speed`, `uv_index` und `is_day` weiter.
+- **AccuWeather: jetzt aktualisieren** (`refresh_weather`) — fragt AccuWeather
+  sofort ab. Gibt `refreshed` und `calls_last_24h` weiter.
+
+Die beiden Lese-Aktionen nutzen den Zwischenspeicher: Sie kosten keine
+Anfrage. Wähle in jeder Aktion metrische (°C, m/s) oder US-Einheiten (°F,
+mph).
+
+## Dashboard
+
+Füge die Widgets im Dashboard-Editor hinzu:
+
+- **AccuWeather aktuell** — Temperatur, gefühlte Temperatur, Feuchte, Wind,
+  eine Kurve der nächsten 12 Stunden, die Warnungen, der kommende Regen und
+  die Zahl der Anfragen in 24 Stunden. Eine Schaltfläche **Aktualisieren**
+  fragt AccuWeather sofort ab.
+- **AccuWeather 5 Tage** — die nächsten Tage mit den Worten von AccuWeather,
+  Tag und Nacht. Die Einstellung **Angezeigte Tage** geht von 1 bis 5.
+
+## Fehlerbehebung
+
+- **„AccuWeather lehnt den API-Schlüssel ab“** — kopiere den Schlüssel erneut
+  von developer.accuweather.com (My Apps), ohne Leerzeichen, und speichere.
+- **„Das tägliche AccuWeather-Kontingent ist aufgebraucht“** — erhöhe das
+  Aktualisierungsintervall oder schalte die stündliche Vorhersage oder die
+  Warnungen aus. Das Kontingent erneuert sich innerhalb von 24 Stunden.
+- **„Lege die Position deines Hauses fest“** — dein Gladys-Haus hat keine
+  Position: Lege sie unter Einstellungen > Häuser fest.
+- **Falsche Stadt** — trage den AccuWeather-Ortsschlüssel ein: Suche deine
+  Stadt auf accuweather.com, der Schlüssel ist die Zahl am Ende ihrer
+  Adresse.
+- Die Logs der Integration findest du in der Gladys-Oberfläche (Seite der
+  Integration) oder mit `docker logs` auf dem Host.
