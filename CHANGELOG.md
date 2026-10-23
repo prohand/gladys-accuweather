@@ -9,6 +9,10 @@ section under the version it ships, and the section becomes the notes of the Git
 
 ## [Unreleased]
 
+## [0.0.2] - 2026-10-23
+
+- Maintenance release, no functional change.
+
 ## [0.0.1] - 2026-10-16
 
 ### Added
@@ -29,5 +33,6 @@ section under the version it ships, and the section becomes the notes of the Git
 - `SECURITY.md`, `CLAUDE.md`, CI (Node 22 and 24, store checks, Docker build), Release, Build and
   GitHub releases workflows, Dependabot.
 
-[Unreleased]: https://github.com/prohand/gladys-accuweather/compare/v0.0.1...HEAD
+[Unreleased]: https://github.com/prohand/gladys-accuweather/compare/v0.0.2...HEAD
+[0.0.2]: https://github.com/prohand/gladys-accuweather/compare/v0.0.1...v0.0.2
 [0.0.1]: https://github.com/prohand/gladys-accuweather/releases/tag/v0.0.1
