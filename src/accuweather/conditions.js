@@ -3,7 +3,8 @@
 //
 // AccuWeather describes the sky with an icon number (1-44, night icons from 33)
 // and alerts with a colour and a free-text category. Gladys wants one of the
-// pivot conditions (`WEATHER_CONDITIONS`) and a CAP severity
+// pivot conditions (`WEATHER_CONDITIONS`, refined by the rest of the entry:
+// intensity, precipitation type, temperature) and a CAP severity
 // (`WEATHER_ALERT_SEVERITIES`). The tables below are the whole translation.
 // -----------------------------------------------------------------------------
 
@@ -63,19 +64,85 @@ export const ICON_CONDITIONS = {
   44: C.SNOW, // Mostly cloudy with snow
 };
 
+/** At or below this temperature (°C), fog deposits rime: "freezing fog". */
+const FREEZING_POINT = 0;
+
 /**
- * The pivot condition of an AccuWeather icon. Heavy rain is "pouring": the
- * icon alone cannot tell, the hourly forecast gives an intensity.
+ * The pivot condition of an AccuWeather icon, made as precise as the rest of
+ * the AccuWeather entry allows. The icon alone flattens three phenomena the
+ * pivot tells apart:
+ *   - heavy rain is "pouring" (`PrecipitationIntensity`, forecasts only);
+ *   - a thunderstorm falling as snow is "snow-thunderstorm" (`PrecipitationType`);
+ *   - fog below 0 °C is "freezing-fog" (the temperature).
+ * Without those details the icon's own condition stands. Never `night`: that
+ * condition is deprecated for providers, `is_day` carries the night.
  * @param {number} icon
- * @param {string} [intensity] `PrecipitationIntensity` ('Light' | 'Moderate' | 'Heavy')
+ * @param {object} [details]
+ * @param {string} [details.intensity] `PrecipitationIntensity` ('Light' | 'Moderate' | 'Heavy')
+ * @param {string} [details.precipitationType] `PrecipitationType` ('Rain' | 'Snow' | 'Ice' | 'Mixed')
+ * @param {number} [details.temperature] air temperature, °C
  */
-export function conditionOf(icon, intensity) {
+export function conditionOf(icon, { intensity, precipitationType, temperature } = {}) {
   const condition = ICON_CONDITIONS[Number(icon)] ?? C.UNKNOWN;
   if (condition === C.RAIN && /heavy/i.test(String(intensity ?? ''))) {
     return C.POURING;
   }
+  if (condition === C.THUNDERSTORM && /snow/i.test(String(precipitationType ?? ''))) {
+    return C.SNOW_THUNDERSTORM;
+  }
+  const degrees = temperature === null || temperature === '' ? NaN : Number(temperature);
+  if (condition === C.FOG && Number.isFinite(degrees) && degrees <= FREEZING_POINT) {
+    return C.FREEZING_FOG;
+  }
   return condition;
 }
+
+/** The precipitation type of an entry, only when it says it precipitates. */
+function precipitationOf(entry) {
+  return entry?.HasPrecipitation === false ? undefined : entry?.PrecipitationType;
+}
+
+/** The condition of the current conditions (`WeatherIcon`, both unit systems). */
+export function currentConditionOf(current) {
+  return conditionOf(current?.WeatherIcon, {
+    precipitationType: precipitationOf(current),
+    temperature: current?.Temperature?.Metric?.Value,
+  });
+}
+
+/** The condition of an hourly forecast entry (asked in metric). */
+export function hourConditionOf(hour) {
+  return conditionOf(hour?.WeatherIcon, {
+    intensity: hour?.PrecipitationIntensity,
+    precipitationType: precipitationOf(hour),
+    temperature: hour?.Temperature?.Value,
+  });
+}
+
+/**
+ * The condition of a daily forecast entry: its daytime half. Fog is freezing
+ * when even the maximum of the day stays at or below 0 °C.
+ */
+export function dayConditionOf(day) {
+  if (!day?.Day?.Icon) {
+    return undefined;
+  }
+  return conditionOf(day.Day.Icon, {
+    intensity: day.Day.PrecipitationIntensity,
+    precipitationType: precipitationOf(day.Day),
+    temperature: day.Temperature?.Maximum?.Value,
+  });
+}
+
+/**
+ * Every condition the current conditions can take: the icons' own, plus the
+ * two refinements of `conditionOf` the current conditions can carry (they have
+ * no intensity, so never "pouring"). The "sky changed" trigger offers exactly
+ * these.
+ */
+export const SKY_CONDITIONS = [
+  ...new Set([...Object.values(ICON_CONDITIONS), C.SNOW_THUNDERSTORM, C.FREEZING_FOG]),
+];
 
 /** Conditions that wet the ground: what "rain expected" watches. */
 export const PRECIPITATION_CONDITIONS = new Set([
@@ -148,18 +215,24 @@ export function severityOf(alert) {
 
 const T = WEATHER_ALERT_TYPES;
 
-/** Keywords of AccuWeather categories and alert names, first match wins. */
+/**
+ * Keywords of AccuWeather categories and alert names, first match wins. The
+ * order settles the names that hold two phenomena: a "coastal flood" is a
+ * flood, a "freezing fog" is fog, a "winter storm" or a "freezing rain" is
+ * snow and ice (Météo France's neige-verglas), a "freeze warning" or a "frost
+ * advisory" is cold, a "dust storm" is wind.
+ */
 const ALERT_TYPE_KEYWORDS = [
   [/avalanche/, T.AVALANCHE],
   [/thunder|lightning|orage/, T.THUNDERSTORM],
   [/flood|inondation/, T.FLOOD],
-  [/coast|surf|tide|marine|wave|submersion/, T.COASTAL],
-  // Before wind: a "winter storm" is snow, not wind.
-  [/snow|\bice\b|blizzard|winter|frost|freez|verglas|neige/, T.SNOW],
-  [/heat|canicule|\bhot\b/, T.HEAT],
-  [/cold|chill|froid/, T.COLD],
+  [/coast|surf|tide|marine|wave|submersion|tsunami|surge|rip current|beach/, T.COASTAL],
   [/fog|brouillard/, T.FOG],
-  [/wind|gale|storm|hurricane|tornado|\bvent\b/, T.WIND],
+  // Before cold: freezing precipitation is ice on the roads, not a cold spell.
+  [/snow|\bice\b|blizzard|winter|sleet|freezing (?:rain|drizzle)|vergla|neige/, T.SNOW],
+  [/heat|canicule|\bhot\b/, T.HEAT],
+  [/cold|chill|frost|freez|froid/, T.COLD],
+  [/wind|gale|storm|hurricane|typhoon|cyclone|tornado|dust|\bsand|\bvent\b/, T.WIND],
   [/rain|pluie|precipitation/, T.RAIN],
 ];
 

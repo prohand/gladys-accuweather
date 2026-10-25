@@ -10,7 +10,13 @@
 // -----------------------------------------------------------------------------
 
 import { WEATHER_CONDITIONS, createLogger } from '@gladysassistant/integration-sdk';
-import { alertTypeOf, conditionOf, severityOf } from './conditions.js';
+import {
+  alertTypeOf,
+  currentConditionOf,
+  dayConditionOf,
+  hourConditionOf,
+  severityOf,
+} from './conditions.js';
 
 const logger = createLogger({ name: 'pivot' });
 
@@ -102,7 +108,7 @@ export function currentToPivot(current, units) {
   const gustKmh = current?.WindGust?.Speed?.Metric?.Value;
   return compact({
     temperature: round(pick(current?.Temperature)),
-    weather: conditionOf(current?.WeatherIcon),
+    weather: currentConditionOf(current),
     datetime: isoDate(current?.LocalObservationDateTime) ?? new Date().toISOString(),
     apparent_temperature: round(pick(current?.RealFeelTemperature)),
     humidity: percent(current?.RelativeHumidity),
@@ -123,7 +129,7 @@ export function currentToPivot(current, units) {
 export function hourToPivot(hour, units) {
   return compact({
     temperature: temperature(hour?.Temperature?.Value, units),
-    weather: conditionOf(hour?.WeatherIcon, hour?.PrecipitationIntensity),
+    weather: hourConditionOf(hour),
     datetime: isoDate(hour?.DateTime),
     apparent_temperature: temperature(hour?.RealFeelTemperature?.Value, units),
     humidity: percent(hour?.RelativeHumidity),
@@ -155,7 +161,7 @@ export function dayToPivot(day, units) {
     temperature_min: temperature(day?.Temperature?.Minimum?.Value, units),
     temperature_max: temperature(day?.Temperature?.Maximum?.Value, units),
     datetime: isoDate(day?.Date),
-    weather: day?.Day?.Icon ? conditionOf(day.Day.Icon) : undefined,
+    weather: dayConditionOf(day),
     humidity: percent(day?.Day?.RelativeHumidity?.Average),
     wind_speed: windSpeed(day?.Day?.Wind?.Speed?.Value, units),
     wind_direction: round(day?.Day?.Wind?.Direction?.Degrees, 0),

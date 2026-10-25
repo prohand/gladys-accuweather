@@ -2,7 +2,7 @@
 
 External integration making [AccuWeather](https://www.accuweather.com) the
 weather provider of [Gladys Assistant](https://gladysassistant.com), with
-AccuWeather scene triggers, scene actions and dashboard widgets (Gladys 5.1+).
+AccuWeather scene triggers, scene actions and dashboard widgets (Gladys 5.3.0+).
 
 Built on the official
 [JavaScript integration template](https://github.com/GladysAssistant/integration-template-js)
@@ -27,7 +27,8 @@ User documentation: [English](./docs/en.md) · [Français](./docs/fr.md) ·
   key in the `Authorization: Bearer` header.
 - **Location**: the manifest declares `"location": true` — the scene triggers
   and the widgets need the position of the house outside `onWeatherGet`. The
-  first located house of Gladys is watched; a location key typed in the
+  house picked in the configuration (a `source: "houses"` select), else the
+  first located house of Gladys, is watched; a location key typed in the
   configuration wins.
 - **Languages**: every text (manifest, messages, widgets, docs) exists in
   English, French, German and Spanish.

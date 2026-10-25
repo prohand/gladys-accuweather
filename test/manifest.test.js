@@ -12,7 +12,7 @@ import { ACTIONS } from '../src/capabilities/actions.js';
 import { FORECAST_DAYS, SCENE_ACTIONS } from '../src/capabilities/scenes.js';
 import { OTHER_ALERT_TYPE, SCENE_TRIGGERS } from '../src/capabilities/triggers.js';
 import { WIDGET_KEYS } from '../src/capabilities/widgets.js';
-import { ICON_CONDITIONS, PRECIPITATION_TYPES } from '../src/accuweather/conditions.js';
+import { PRECIPITATION_TYPES, SKY_CONDITIONS } from '../src/accuweather/conditions.js';
 import { LANGUAGES } from '../src/i18n.js';
 import { WEATHER_ALERT_SEVERITIES, WEATHER_ALERT_TYPES } from '@gladysassistant/integration-sdk';
 
@@ -62,7 +62,7 @@ test('the trigger filters offer exactly the values the code fires', () => {
   );
   assert.deepEqual(
     optionsOf(triggers, 'condition_changed', 'condition'),
-    [...new Set(Object.values(ICON_CONDITIONS))].sort(),
+    [...SKY_CONDITIONS].sort(),
   );
   assert.deepEqual(
     optionsOf(triggers, 'rain_expected', 'precipitation_type'),
@@ -99,6 +99,16 @@ test('config_schema defaults stay consistent with DEFAULT_CONFIG', () => {
       assert.equal(DEFAULT_CONFIG[field.key], field.default, `default of ${field.key}`);
     }
   }
+});
+
+test('the watched house is picked from the Gladys houses, empty by default', () => {
+  const field = manifest.config_schema.find((entry) => entry.key === 'house');
+  assert.equal(field.type, 'select');
+  assert.equal(field.source, 'houses');
+  // The store refuses a default (and static options) on a dynamic source.
+  assert.equal(field.default, undefined);
+  assert.equal(field.options, undefined);
+  assert.equal(DEFAULT_CONFIG.house, '');
 });
 
 test('the API key is a secret field', () => {
@@ -166,9 +176,35 @@ test('the store length limits hold in every language', () => {
   }
 });
 
-test('the Gladys floor covers the capability fields (5.1.0)', () => {
-  const [major, minor] = manifest.gladys_version.replace(/^>=/, '').split('.').map(Number);
-  assert.ok(major > 5 || (major === 5 && minor >= 1), manifest.gladys_version);
+/** The minimum of the `gladys_version` range, as numbers. */
+function gladysFloor() {
+  const match = /^>=\s*(\d+)\.(\d+)\.(\d+)$/.exec(manifest.gladys_version);
+  assert.ok(match, `gladys_version "${manifest.gladys_version}" is not a plain >= range`);
+  return match.slice(1).map(Number);
+}
+
+const floorAtLeast = ([major, minor]) => {
+  const [floorMajor, floorMinor] = gladysFloor();
+  return floorMajor > major || (floorMajor === major && floorMinor >= minor);
+};
+
+test('the Gladys floor covers every field the manifest declares', () => {
+  // Older cores validate the manifest against a strict allowlist and refuse it
+  // whole over a field they do not know.
+  if (manifest.categories) {
+    assert.ok(floorAtLeast([4, 86]), 'categories need Gladys 4.86.0');
+  }
+  if (manifest.widgets || manifest.scene_triggers || manifest.scene_actions) {
+    assert.ok(floorAtLeast([5, 1]), 'widgets and scene cards need Gladys 5.1.0');
+  }
+  if (allFields.some((field) => field.source === 'houses')) {
+    assert.ok(floorAtLeast([5, 2]), 'a houses select needs Gladys 5.2.0');
+  }
+  if (manifest.keywords || manifest.countries || manifest.music) {
+    assert.ok(floorAtLeast([5, 3]), 'keywords, countries and music need Gladys 5.3.0');
+  }
+  // What this integration declares today.
+  assert.ok(floorAtLeast([5, 3]), manifest.gladys_version);
 });
 
 test('the categories stay inside the store vocabulary', () => {
@@ -185,11 +221,34 @@ test('the categories stay inside the store vocabulary', () => {
     'notifications',
     'assistants',
     'services',
+    'transport',
+    'vehicles',
+    'servers',
+    'leisure',
   ];
   assert.ok(manifest.categories.length >= 1 && manifest.categories.length <= 3);
+  assert.equal(new Set(manifest.categories).size, manifest.categories.length);
   for (const category of manifest.categories) {
     assert.ok(vocabulary.includes(category), category);
   }
+});
+
+test('the search keywords follow the store rules', () => {
+  const { keywords } = manifest;
+  assert.ok(Array.isArray(keywords), 'keywords are declared');
+  assert.ok(keywords.length >= 1 && keywords.length <= 10, `${keywords.length} keywords`);
+  for (const keyword of keywords) {
+    assert.equal(typeof keyword, 'string');
+    const length = keyword.trim().length;
+    assert.ok(length >= 2 && length <= 30, `keyword "${keyword}": ${length} characters`);
+  }
+  const normalized = keywords.map((keyword) => keyword.trim().toLowerCase());
+  assert.equal(new Set(normalized).size, keywords.length, 'keywords are unique');
+});
+
+test('AccuWeather covers the whole world: no country restriction', () => {
+  // Declared countries hide the integration from the catalog everywhere else.
+  assert.equal(manifest.countries, undefined);
 });
 
 test('the manifest version is the package version, and the image is tagged with it', () => {

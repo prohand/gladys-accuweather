@@ -17,7 +17,7 @@
 // -----------------------------------------------------------------------------
 
 import { WIDGET_COLORS, WEATHER_CONDITIONS, createLogger } from '@gladysassistant/integration-sdk';
-import { SEVERITY_ORDER, conditionOf } from '../accuweather/conditions.js';
+import { SEVERITY_ORDER, currentConditionOf, dayConditionOf } from '../accuweather/conditions.js';
 import { UNITS, alertToPivot, round, temperature } from '../accuweather/pivot.js';
 import { isConfigured } from '../config.js';
 import { refreshMessage } from './actions.js';
@@ -65,6 +65,18 @@ export const CONDITION_LABELS = {
     de: 'Glatteisregen',
     es: 'Lluvia helada',
   },
+  [C.FREEZING_FOG]: {
+    en: 'Freezing fog',
+    fr: 'Brouil. givrant',
+    de: 'Eisnebel',
+    es: 'Niebla helada',
+  },
+  [C.SNOW_THUNDERSTORM]: {
+    en: 'Thundersnow',
+    fr: 'Orage de neige',
+    de: 'Schneegewitter',
+    es: 'Nieve y tormenta',
+  },
   [C.UNKNOWN]: { en: 'Unknown', fr: 'Inconnu', de: 'Unbekannt', es: 'Desconocido' },
 };
 
@@ -77,6 +89,8 @@ const CONDITION_COLORS = {
   [C.THUNDERSTORM]: WIDGET_COLORS.WARNING,
   [C.WIND]: WIDGET_COLORS.WARNING,
   [C.FREEZING_RAIN]: WIDGET_COLORS.DANGER,
+  [C.FREEZING_FOG]: WIDGET_COLORS.DANGER,
+  [C.SNOW_THUNDERSTORM]: WIDGET_COLORS.WARNING,
 };
 
 const SEVERITY_COLORS = {
@@ -262,7 +276,7 @@ export async function buildNowWidget(service, { language = 'en', units = UNITS.M
   const current = entry.current;
   const us = units === UNITS.US;
   const system = us ? 'Imperial' : 'Metric';
-  const condition = conditionOf(current.WeatherIcon);
+  const condition = currentConditionOf(current);
   const components = [];
 
   components.push({
@@ -430,7 +444,7 @@ export async function buildForecastWidget(
     type: 'card-list',
     display: 'list',
     items: days.map((day) => {
-      const condition = conditionOf(day.Day?.Icon);
+      const condition = dayConditionOf(day);
       const min = temperature(day.Temperature?.Minimum?.Value, units);
       const max = temperature(day.Temperature?.Maximum?.Value, units);
       const rain = Math.max(

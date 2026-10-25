@@ -28,6 +28,7 @@ export const DEFAULT_CONFIG = {
   hourly_forecast: true,
   alerts: true,
   location_key: '',
+  house: '',
 };
 
 /**
@@ -51,6 +52,9 @@ export function normalizeConfig(raw = {}) {
     location_key: String(source.location_key ?? '')
       .trim()
       .replace(/[^0-9A-Za-z_]/g, ''),
+    // The selector of the house picked in the `houses` select (Gladys 5.2+);
+    // empty = the first located house, as before the field existed.
+    house: String(source.house ?? '').trim(),
   };
 }
 

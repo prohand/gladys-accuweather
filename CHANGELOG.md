@@ -9,6 +9,26 @@ section under the version it ships, and the section becomes the notes of the Git
 
 ## [Unreleased]
 
+### Added
+
+- "House to watch" setting: pick, among the Gladys houses, the one whose weather the widgets and
+  the scene triggers follow (empty = the first house placed on the map, as before).
+- More precise conditions from the SDK 0.16 weather pivot: fog at or below 0 °C is "freezing
+  fog", a thunderstorm falling as snow is "thundersnow" (current conditions, hours and days), and
+  the daily forecast reports heavy rain. The "sky changed" trigger can filter on both new
+  conditions.
+- Search keywords for the Gladys catalog (météo, wetter, tiempo, RealFeel, MeteoAlarm…).
+
+### Changed
+
+- Gladys 5.3.0 or later is now required.
+- SDK `@gladysassistant/integration-sdk` 0.16.
+- Alert types are more precise: freezing fog alerts are fog, freeze and frost warnings are cold,
+  storm surge, tsunami and rip current alerts are coastal, dust storms are wind.
+- The night is only ever carried by `is_day`, never by the deprecated `night` condition.
+- CI: the pull-request store check skips the image check; the Release workflow runs the full
+  store check on the released tag once the image is published.
+
 ## [0.0.2] - 2026-10-23
 
 - Maintenance release, no functional change.

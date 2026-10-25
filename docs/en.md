@@ -4,7 +4,7 @@ This integration makes [AccuWeather](https://www.accuweather.com) the weather
 provider of Gladys: the Gladys weather widget, the chat assistant and the
 weather alerts use it instead of the built-in OpenWeather service. It also
 adds AccuWeather scene triggers, scene actions and two dashboard widgets
-(Gladys 5.1 or later).
+(Gladys 5.3.0 or later is required).
 
 It is a **cloud** integration: it needs Internet access and an AccuWeather
 API key. Nothing runs on your local network.
@@ -23,14 +23,15 @@ API key. Nothing runs on your local network.
 
 Open the **Configuration** tab of the integration:
 
-| Field                         | What it does                                                                                                                               |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| API key                       | The key of your AccuWeather app. Mandatory.                                                                                                |
-| Language of AccuWeather texts | Language of the alert names and of the weather phrases ("Partly sunny"...). English, French, German or Spanish.                            |
-| Refresh interval (minutes)    | How often AccuWeather is asked, from 30 to 1440 minutes. 120 by default.                                                                   |
-| Hourly forecast (12 hours)    | The next 12 hours. Needed by the "Rain expected" trigger and by the curve of the widget.                                                   |
-| Severe weather alerts         | Official alerts relayed by AccuWeather. Not included in every AccuWeather plan: when your plan refuses them, the integration stops asking. |
-| AccuWeather location key      | Optional. Leave empty to use the position of your house. Fill it in (for example `623` for Paris) to force another AccuWeather location.   |
+| Field                         | What it does                                                                                                                                                             |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| API key                       | The key of your AccuWeather app. Mandatory.                                                                                                                              |
+| Language of AccuWeather texts | Language of the alert names and of the weather phrases ("Partly sunny"...). English, French, German or Spanish.                                                          |
+| Refresh interval (minutes)    | How often AccuWeather is asked, from 30 to 1440 minutes. 120 by default.                                                                                                 |
+| Hourly forecast (12 hours)    | The next 12 hours. Needed by the "Rain expected" trigger and by the curve of the widget.                                                                                 |
+| Severe weather alerts         | Official alerts relayed by AccuWeather. Not included in every AccuWeather plan: when your plan refuses them, the integration stops asking.                               |
+| AccuWeather location key      | Optional. Leave empty to use the position of your house. Fill it in (for example `623` for Paris) to force another AccuWeather location.                                 |
+| House to watch                | Optional. The house whose weather the widgets and the scene triggers follow; empty = the first house placed on the map. A picked house with no position watches nothing. |
 
 Save, then click **Test the connection**: it shows the AccuWeather location
 found, the current weather, and how many requests your settings cost per day.
@@ -77,7 +78,9 @@ refresh after the installation only records the current situation.
   `type`, `description`, `starts_at`, `ends_at`, `location`.
 - **AccuWeather: the sky changed** (`condition_changed`) — the current
   conditions changed, for example from clear to rain. Filter on the new
-  condition. Variables: `condition`, `previous_condition`, `description`,
+  condition. Fog at or below 0 °C is reported as freezing fog, and a
+  thunderstorm falling as snow as thundersnow; at night the condition stays
+  the real one (clear, rain…), never a generic "night". Variables: `condition`, `previous_condition`, `description`,
   `temperature` (°C), `location`.
 - **AccuWeather: rain expected** (`rain_expected`) — precipitation is
   forecast within the next 3 hours, where none was at the previous refresh.

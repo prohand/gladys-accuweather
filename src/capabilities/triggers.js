@@ -20,7 +20,8 @@
 import { createLogger } from '@gladysassistant/integration-sdk';
 import {
   PRECIPITATION_CONDITIONS,
-  conditionOf,
+  currentConditionOf,
+  hourConditionOf,
   precipitationTypeOf,
 } from '../accuweather/conditions.js';
 import { alertId, alertToPivot, round } from '../accuweather/pivot.js';
@@ -70,7 +71,7 @@ export function firstWetHour(hourly, now) {
     const wet =
       hour?.HasPrecipitation === true ||
       Number(hour?.PrecipitationProbability) >= RAIN_PROBABILITY ||
-      PRECIPITATION_CONDITIONS.has(conditionOf(hour?.WeatherIcon));
+      PRECIPITATION_CONDITIONS.has(hourConditionOf(hour));
     if (wet) {
       return { hour, time };
     }
@@ -168,7 +169,7 @@ export class TriggerWatcher {
     // --- Condition: the sky of the current conditions.
     const current = entry.current;
     if (current) {
-      const condition = conditionOf(current.WeatherIcon);
+      const condition = currentConditionOf(current);
       if (memory.condition && condition !== memory.condition) {
         events.push([
           SCENE_TRIGGERS.CONDITION_CHANGED,

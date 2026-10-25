@@ -13,8 +13,8 @@
 // "temperature_max"...) and the scene author gates the next actions on them.
 // -----------------------------------------------------------------------------
 
-import { createLogger } from '@gladysassistant/integration-sdk';
-import { conditionOf } from '../accuweather/conditions.js';
+import { WEATHER_CONDITIONS, createLogger } from '@gladysassistant/integration-sdk';
+import { dayConditionOf } from '../accuweather/conditions.js';
 import { UNITS, currentToPivot, dayToPivot } from '../accuweather/pivot.js';
 
 const logger = createLogger({ name: 'scenes' });
@@ -59,7 +59,7 @@ export function buildSceneActions(service) {
       const pivot = dayToPivot(day, units);
       logger.info(`Scene action get_forecast <- ${fields?.day ?? 'today'}`);
       return {
-        condition: conditionOf(day.Day?.Icon),
+        condition: dayConditionOf(day) ?? WEATHER_CONDITIONS.UNKNOWN,
         description: String(day.Day?.IconPhrase ?? ''),
         temperature_min: pivot.temperature_min ?? null,
         temperature_max: pivot.temperature_max ?? null,

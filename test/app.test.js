@@ -115,6 +115,25 @@ test('scene actions and widgets are reachable through Gladys', async () => {
   assert.equal(tap.success, true);
 });
 
+test('the house picked in the configuration is the one watched', async () => {
+  const houses = [
+    ...HOUSES,
+    { id: 'h2', name: 'Seaside', selector: 'seaside', latitude: 43.2965, longitude: 5.3698 },
+  ];
+  const { app, fake } = await start({ config: { api_key: 'key', house: 'seaside' }, houses });
+  assert.equal(app.service.home.name, 'Seaside');
+  assert.ok(fake.requests.some((request) => String(request.query.q ?? '').includes('43.2965')));
+});
+
+test('a picked house that is not on the map watches nothing, never another house', async () => {
+  const { app, fake, gladys } = await start({ config: { api_key: 'key', house: 'cabin' } });
+  assert.equal(app.service.home, null);
+  assert.equal(fake.requests.length, 0);
+  // Picking another house is applied at once.
+  await gladys.fake.configUpdated({ api_key: 'key', house: 'home' });
+  assert.equal(app.service.home.name, 'Home');
+});
+
 test('without a located house, Gladys still gets its weather', async () => {
   const { gladys, fake } = await start({ houses: [] });
   assert.equal(fake.requests.length, 0);

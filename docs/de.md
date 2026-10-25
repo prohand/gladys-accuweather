@@ -4,7 +4,7 @@ Diese Integration macht [AccuWeather](https://www.accuweather.com) zum
 Wetteranbieter von Gladys: Das Wetter-Widget von Gladys, der Chat-Assistent
 und die Wetterwarnungen nutzen es anstelle des integrierten
 OpenWeather-Dienstes. Sie fügt außerdem AccuWeather-Szenen-Auslöser,
-Szenen-Aktionen und zwei Dashboard-Widgets hinzu (Gladys 5.1 oder neuer).
+Szenen-Aktionen und zwei Dashboard-Widgets hinzu (Gladys 5.3.0 oder neuer ist erforderlich).
 
 Es ist eine **Cloud**-Integration: Sie braucht einen Internetzugang und einen
 AccuWeather-API-Schlüssel. In deinem lokalen Netzwerk läuft nichts.
@@ -24,14 +24,15 @@ AccuWeather-API-Schlüssel. In deinem lokalen Netzwerk läuft nichts.
 
 Öffne den Reiter **Konfiguration** der Integration:
 
-| Feld                               | Wozu                                                                                                                                                        |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| API-Schlüssel                      | Der Schlüssel deiner AccuWeather-App. Pflichtfeld.                                                                                                          |
-| Sprache der AccuWeather-Texte      | Sprache der Warnungsnamen und der Wetterbeschreibungen („Teilweise sonnig“…). Englisch, Französisch, Deutsch oder Spanisch.                                 |
-| Aktualisierungsintervall (Minuten) | Wie oft AccuWeather abgefragt wird, 30 bis 1440 Minuten. Standard: 120.                                                                                     |
-| Stündliche Vorhersage (12 Stunden) | Die nächsten 12 Stunden. Nötig für den Auslöser „Regen erwartet“ und die Kurve des Widgets.                                                                 |
-| Unwetterwarnungen                  | Von AccuWeather weitergegebene amtliche Warnungen. Nicht in jedem Tarif enthalten: Lehnt dein Tarif sie ab, fragt die Integration nicht mehr danach.        |
-| AccuWeather-Ortsschlüssel          | Optional. Leer lassen, um die Position deines Hauses zu verwenden. Ausfüllen (zum Beispiel `623` für Paris), um einen anderen AccuWeather-Ort zu erzwingen. |
+| Feld                               | Wozu                                                                                                                                                                                     |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| API-Schlüssel                      | Der Schlüssel deiner AccuWeather-App. Pflichtfeld.                                                                                                                                       |
+| Sprache der AccuWeather-Texte      | Sprache der Warnungsnamen und der Wetterbeschreibungen („Teilweise sonnig“…). Englisch, Französisch, Deutsch oder Spanisch.                                                              |
+| Aktualisierungsintervall (Minuten) | Wie oft AccuWeather abgefragt wird, 30 bis 1440 Minuten. Standard: 120.                                                                                                                  |
+| Stündliche Vorhersage (12 Stunden) | Die nächsten 12 Stunden. Nötig für den Auslöser „Regen erwartet“ und die Kurve des Widgets.                                                                                              |
+| Unwetterwarnungen                  | Von AccuWeather weitergegebene amtliche Warnungen. Nicht in jedem Tarif enthalten: Lehnt dein Tarif sie ab, fragt die Integration nicht mehr danach.                                     |
+| AccuWeather-Ortsschlüssel          | Optional. Leer lassen, um die Position deines Hauses zu verwenden. Ausfüllen (zum Beispiel `623` für Paris), um einen anderen AccuWeather-Ort zu erzwingen.                              |
+| Zu beobachtendes Haus              | Optional. Das Haus, dessen Wetter die Widgets und die Szenen-Auslöser verfolgen; leer = das erste auf der Karte platzierte Haus. Ein gewähltes Haus ohne Position wird nicht beobachtet. |
 
 Speichere und klicke dann auf **Verbindung testen**: Angezeigt werden der
 gefundene AccuWeather-Ort, das aktuelle Wetter und wie viele Anfragen deine
@@ -83,7 +84,10 @@ die aktuelle Lage.
   `type`, `description`, `starts_at`, `ends_at`, `location`.
 - **AccuWeather: der Himmel hat sich geändert** (`condition_changed`) — die
   aktuellen Bedingungen haben sich geändert, zum Beispiel von klar zu Regen.
-  Filter nach der neuen Bedingung. Variablen: `condition`,
+  Filter nach der neuen Bedingung. Nebel bei 0 °C oder darunter wird als
+  gefrierender Nebel gemeldet, ein Gewitter mit Schneefall als
+  Schneegewitter; nachts bleibt die Bedingung die echte (klar, Regen…), nie
+  eine allgemeine „Nacht“. Variablen: `condition`,
   `previous_condition`, `description`, `temperature` (°C), `location`.
 - **AccuWeather: Regen erwartet** (`rain_expected`) — Niederschlag ist in den
   nächsten 3 Stunden vorhergesagt, bei der vorherigen Aktualisierung keiner.
