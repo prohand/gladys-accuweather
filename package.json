@@ -1,6 +1,6 @@
 {
   "name": "gladys-accuweather",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Gladys Assistant external integration for AccuWeather: weather provider, scene triggers, scene actions and dashboard widgets.",
   "type": "module",
