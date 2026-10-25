@@ -74,3 +74,33 @@ test('no temperature, no payload: the core would refuse it', () => {
   assert.throws(() => toPivot({ current: current({ Temperature: {} }) }, UNITS.METRIC));
   assert.throws(() => toPivot({}, UNITS.METRIC));
 });
+
+test('a night keeps its meteorology: `is_day` carries the night, never "night"', () => {
+  const night = toPivot(
+    { current: current({ WeatherIcon: 40, IsDayTime: false, WeatherText: 'Showers' }) },
+    UNITS.METRIC,
+  );
+  assert.equal(night.weather, WEATHER_CONDITIONS.RAIN);
+  assert.equal(night.is_day, false);
+});
+
+test('the payload carries the precise conditions of the 0.16 pivot', () => {
+  const freezing = toPivot(
+    {
+      current: current({
+        WeatherIcon: 11,
+        IsDayTime: false,
+        Temperature: { Metric: { Value: -3 }, Imperial: { Value: 26.6 } },
+      }),
+      hourly: hourly().map((hour, index) =>
+        index === 0
+          ? { ...hour, WeatherIcon: 15, HasPrecipitation: true, PrecipitationType: 'Snow' }
+          : hour,
+      ),
+    },
+    UNITS.METRIC,
+  );
+  assert.equal(freezing.weather, WEATHER_CONDITIONS.FREEZING_FOG);
+  assert.equal(freezing.is_day, false);
+  assert.equal(freezing.hours[0].weather, WEATHER_CONDITIONS.SNOW_THUNDERSTORM);
+});

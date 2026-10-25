@@ -139,6 +139,10 @@ export function createApp(gladys, { fetch, dataDir, now = () => Date.now(), time
   gladys.onConfigUpdated(async (raw) => {
     await load();
     const config = normalizeConfig(raw);
+    if (config.house !== service.config.house) {
+      // Another house picked: read the houses again now, not within the hour.
+      housesReadAt = 0;
+    }
     const changes = service.setConfig(config);
     logger.info(
       `Configuration updated (key ${maskKey(config.api_key) || 'none'}, every ${config.refresh_minutes} min)`,
@@ -189,7 +193,12 @@ export function createApp(gladys, { fetch, dataDir, now = () => Date.now(), time
     await reportStatus();
   }
 
-  /** The house the widgets and triggers watch: the first located one. */
+  /**
+   * The house the widgets and triggers watch: the one picked in the `house`
+   * setting, else the first located one. A picked house that is gone or not
+   * on the map watches nothing (never another house, never 0, 0): the widgets
+   * then ask for a located house.
+   */
   async function readHouses() {
     if (now() - housesReadAt < HOUSES_MAX_AGE_MS && service.home) {
       return;
@@ -197,10 +206,18 @@ export function createApp(gladys, { fetch, dataDir, now = () => Date.now(), time
     try {
       const houses = await gladys.getHouses();
       housesReadAt = now();
-      const house = houses.find(
-        (candidate) => Number.isFinite(candidate.latitude) && Number.isFinite(candidate.longitude),
-      );
-      const home = house
+      const located = (candidate) =>
+        Number.isFinite(candidate?.latitude) && Number.isFinite(candidate?.longitude);
+      const picked = service.config.house;
+      const house = picked
+        ? houses.find((candidate) => candidate.selector === picked)
+        : houses.find(located);
+      if (picked && !house) {
+        logger.warn(`The house picked in the configuration (${picked}) no longer exists`);
+      } else if (picked && !located(house)) {
+        logger.warn(`The house "${house.name}" has no position: place it on the map in Gladys`);
+      }
+      const home = located(house)
         ? { latitude: house.latitude, longitude: house.longitude, name: house.name }
         : null;
       if (home?.name !== service.home?.name || !home) {

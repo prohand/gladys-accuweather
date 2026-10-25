@@ -6,9 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A Gladys Assistant **external integration** (Node 22+, ESM, no build step, one runtime
 dependency: `@gladysassistant/integration-sdk`) making **AccuWeather** the weather provider of
-Gladys (manifest `type: "weather"`, `transports: ["cloud"]`, `location: true`). Gladys 5.1+ adds
-scene triggers (new alert, sky changed, rain expected, frost expected), scene actions (read the
-forecast, read the current weather, refresh) and two dashboard widgets.
+Gladys (manifest `type: "weather"`, `transports: ["cloud"]`, `location: true`). It requires
+Gladys 5.3.0+ (manifest `keywords`) and adds scene triggers (new alert, sky changed, rain
+expected, frost expected), scene actions (read the forecast, read the current weather, refresh)
+and two dashboard widgets.
 
 ## Commands
 
@@ -49,6 +50,11 @@ src/capabilities/            triggers, scene actions, widgets, Configuration scr
   through `WeatherService.weatherAt`, which only asks the parts older than `refresh_minutes`
   (daily forecast: at least 3 h). Never add a code path that calls the client directly for
   data a reader asked for.
+- **Conditions are as precise as the entry allows, never `night`** (`conditions.js`): the icon
+  gives the condition, `PrecipitationIntensity` makes rain `pouring`, a snow `PrecipitationType`
+  makes a thunderstorm `snow-thunderstorm`, fog at or below 0 °C is `freezing-fog`; the night is
+  `is_day: false` (the `night` condition is deprecated for providers). The "sky changed" trigger
+  offers exactly `SKY_CONDITIONS`.
 - **Forecasts are fetched in metric only** and converted in `pivot.js`; current conditions carry
   both systems. Pivot metric wind is m/s (AccuWeather sends km/h).
 - **The cache survives restarts** (`/data`, the only writable path). Location keys are cached for

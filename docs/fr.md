@@ -4,7 +4,7 @@ Cette intégration fait d'[AccuWeather](https://www.accuweather.com) le
 fournisseur météo de Gladys : le widget météo de Gladys, l'assistant de chat
 et les alertes météo l'utilisent à la place du service OpenWeather intégré.
 Elle ajoute aussi des déclencheurs et des actions de scène AccuWeather, et
-deux widgets de tableau de bord (Gladys 5.1 ou plus récent).
+deux widgets de tableau de bord (Gladys 5.3.0 ou plus récent est requis).
 
 C'est une intégration **cloud** : elle a besoin d'un accès Internet et d'une
 clé d'API AccuWeather. Rien ne tourne sur votre réseau local.
@@ -24,14 +24,15 @@ clé d'API AccuWeather. Rien ne tourne sur votre réseau local.
 
 Ouvrez l'onglet **Configuration** de l'intégration :
 
-| Champ                                    | Rôle                                                                                                                                                     |
-| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Clé d'API                                | La clé de votre application AccuWeather. Obligatoire.                                                                                                    |
-| Langue des textes AccuWeather            | Langue des noms d'alertes et des descriptions du temps (« Éclaircies »…). Anglais, français, allemand ou espagnol.                                       |
-| Intervalle de rafraîchissement (minutes) | Fréquence des requêtes à AccuWeather, de 30 à 1440 minutes. 120 par défaut.                                                                              |
-| Prévisions horaires (12 heures)          | Les 12 prochaines heures. Nécessaire au déclencheur « Pluie attendue » et à la courbe du widget.                                                         |
-| Alertes météo                            | Alertes officielles relayées par AccuWeather. Pas incluses dans toutes les offres : si votre offre les refuse, l'intégration arrête de les demander.     |
-| Clé de lieu AccuWeather                  | Facultatif. Laissez vide pour utiliser la position de votre maison. Renseignez-la (par exemple `623` pour Paris) pour imposer un autre lieu AccuWeather. |
+| Champ                                    | Rôle                                                                                                                                                                                      |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Clé d'API                                | La clé de votre application AccuWeather. Obligatoire.                                                                                                                                     |
+| Langue des textes AccuWeather            | Langue des noms d'alertes et des descriptions du temps (« Éclaircies »…). Anglais, français, allemand ou espagnol.                                                                        |
+| Intervalle de rafraîchissement (minutes) | Fréquence des requêtes à AccuWeather, de 30 à 1440 minutes. 120 par défaut.                                                                                                               |
+| Prévisions horaires (12 heures)          | Les 12 prochaines heures. Nécessaire au déclencheur « Pluie attendue » et à la courbe du widget.                                                                                          |
+| Alertes météo                            | Alertes officielles relayées par AccuWeather. Pas incluses dans toutes les offres : si votre offre les refuse, l'intégration arrête de les demander.                                      |
+| Clé de lieu AccuWeather                  | Facultatif. Laissez vide pour utiliser la position de votre maison. Renseignez-la (par exemple `623` pour Paris) pour imposer un autre lieu AccuWeather.                                  |
+| Maison à surveiller                      | Facultatif. La maison dont les widgets et les déclencheurs de scène suivent la météo ; vide = la première maison placée sur la carte. Une maison choisie sans position ne surveille rien. |
 
 Enregistrez, puis cliquez sur **Tester la connexion** : le lieu AccuWeather
 trouvé, la météo actuelle et le nombre de requêtes par jour de vos réglages
@@ -82,7 +83,10 @@ seulement la situation actuelle.
   `severity`, `type`, `description`, `starts_at`, `ends_at`, `location`.
 - **AccuWeather : le ciel a changé** (`condition_changed`) — les conditions
   actuelles ont changé, par exemple de dégagé à pluie. Filtrez sur la
-  nouvelle condition. Variables : `condition`, `previous_condition`,
+  nouvelle condition. Le brouillard à 0 °C ou moins est signalé comme
+  brouillard givrant, et un orage qui tombe en neige comme orage de neige ;
+  la nuit, la condition reste la vraie (dégagé, pluie…), jamais une « nuit »
+  générique. Variables : `condition`, `previous_condition`,
   `description`, `temperature` (°C), `location`.
 - **AccuWeather : pluie attendue** (`rain_expected`) — des précipitations sont
   prévues dans les 3 prochaines heures, alors qu'il n'y en avait pas au

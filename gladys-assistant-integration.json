@@ -10,9 +10,21 @@
   },
   "version": "0.0.2",
   "docker_image": "ghcr.io/prohand/gladys-accuweather:0.0.2",
-  "gladys_version": ">=5.1.0",
+  "gladys_version": ">=5.3.0",
   "cover_image": "https://raw.githubusercontent.com/prohand/gladys-accuweather/main/cover.png",
   "categories": ["environment", "services"],
+  "keywords": [
+    "météo",
+    "meteo",
+    "wetter",
+    "tiempo",
+    "accu weather",
+    "realfeel",
+    "uv index",
+    "meteoalarm",
+    "vigilance",
+    "nws"
+  ],
   "transports": ["cloud"],
   "location": true,
   "config_schema": [
@@ -207,6 +219,24 @@
         "fr": "ex. 623",
         "de": "z. B. 623",
         "es": "p. ej. 623"
+      },
+      "required": false
+    },
+    {
+      "key": "house",
+      "type": "select",
+      "source": "houses",
+      "label": {
+        "en": "House to watch (optional)",
+        "fr": "Maison à surveiller (facultatif)",
+        "de": "Zu beobachtendes Haus (optional)",
+        "es": "Casa a vigilar (opcional)"
+      },
+      "description": {
+        "en": "The house whose weather the widgets and the scene triggers follow. Leave empty for the first house placed on the map. The Gladys weather widget always asks for its own position.",
+        "fr": "La maison dont les widgets et les déclencheurs de scène suivent la météo. Laissez vide pour la première maison placée sur la carte. Le widget météo de Gladys demande toujours sa propre position.",
+        "de": "Das Haus, dessen Wetter die Widgets und die Szenen-Auslöser verfolgen. Leer lassen für das erste auf der Karte platzierte Haus. Das Wetter-Widget von Gladys fragt immer seine eigene Position ab.",
+        "es": "La casa cuyo tiempo siguen los widgets y los disparadores de escenas. Déjela vacía para la primera casa situada en el mapa. El widget del tiempo de Gladys siempre pide su propia ubicación."
       },
       "required": false
     }
@@ -544,6 +574,15 @@
               }
             },
             {
+              "value": "freezing-fog",
+              "label": {
+                "en": "Freezing fog",
+                "fr": "Brouillard givrant",
+                "de": "Gefrierender Nebel",
+                "es": "Niebla helada"
+              }
+            },
+            {
               "value": "rain",
               "label": {
                 "en": "Rain",
@@ -586,6 +625,15 @@
                 "fr": "Orage",
                 "de": "Gewitter",
                 "es": "Tormenta"
+              }
+            },
+            {
+              "value": "snow-thunderstorm",
+              "label": {
+                "en": "Thundersnow",
+                "fr": "Orage de neige",
+                "de": "Schneegewitter",
+                "es": "Nieve con tormenta"
               }
             },
             {

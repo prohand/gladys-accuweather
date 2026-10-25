@@ -4,7 +4,7 @@ Esta integración convierte [AccuWeather](https://www.accuweather.com) en el
 proveedor meteorológico de Gladys: el widget del tiempo de Gladys, el
 asistente de chat y las alertas meteorológicas lo usan en lugar del servicio
 OpenWeather integrado. También añade disparadores y acciones de escena de
-AccuWeather, y dos widgets para el panel (Gladys 5.1 o posterior).
+AccuWeather, y dos widgets para el panel (se requiere Gladys 5.3.0 o posterior).
 
 Es una integración **en la nube**: necesita acceso a Internet y una clave de
 API de AccuWeather. No se ejecuta nada en su red local.
@@ -23,14 +23,15 @@ API de AccuWeather. No se ejecuta nada en su red local.
 
 Abra la pestaña **Configuración** de la integración:
 
-| Campo                                | Para qué sirve                                                                                                                                 |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| Clave de API                         | La clave de su aplicación de AccuWeather. Obligatoria.                                                                                         |
-| Idioma de los textos de AccuWeather  | Idioma de los nombres de alertas y de las descripciones del tiempo («Parcialmente soleado»…). Inglés, francés, alemán o español.               |
-| Intervalo de actualización (minutos) | Frecuencia de las peticiones a AccuWeather, de 30 a 1440 minutos. 120 por defecto.                                                             |
-| Previsión por horas (12 horas)       | Las próximas 12 horas. Necesaria para el disparador «Lluvia prevista» y para la curva del widget.                                              |
-| Alertas meteorológicas               | Alertas oficiales difundidas por AccuWeather. No están en todos los planes: si su plan las rechaza, la integración deja de pedirlas.           |
-| Clave de ubicación AccuWeather       | Opcional. Déjela vacía para usar la ubicación de su casa. Rellénela (por ejemplo `623` para París) para imponer otra ubicación de AccuWeather. |
+| Campo                                | Para qué sirve                                                                                                                                                           |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Clave de API                         | La clave de su aplicación de AccuWeather. Obligatoria.                                                                                                                   |
+| Idioma de los textos de AccuWeather  | Idioma de los nombres de alertas y de las descripciones del tiempo («Parcialmente soleado»…). Inglés, francés, alemán o español.                                         |
+| Intervalo de actualización (minutos) | Frecuencia de las peticiones a AccuWeather, de 30 a 1440 minutos. 120 por defecto.                                                                                       |
+| Previsión por horas (12 horas)       | Las próximas 12 horas. Necesaria para el disparador «Lluvia prevista» y para la curva del widget.                                                                        |
+| Alertas meteorológicas               | Alertas oficiales difundidas por AccuWeather. No están en todos los planes: si su plan las rechaza, la integración deja de pedirlas.                                     |
+| Clave de ubicación AccuWeather       | Opcional. Déjela vacía para usar la ubicación de su casa. Rellénela (por ejemplo `623` para París) para imponer otra ubicación de AccuWeather.                           |
+| Casa a vigilar                       | Opcional. La casa cuyo tiempo siguen los widgets y los disparadores de escenas; vacía = la primera casa situada en el mapa. Una casa elegida sin ubicación no se vigila. |
 
 Guarde y pulse **Probar la conexión**: se muestran la ubicación de AccuWeather
 encontrada, el tiempo actual y cuántas peticiones al día cuestan sus ajustes.
@@ -81,7 +82,10 @@ situación actual.
   `severity`, `type`, `description`, `starts_at`, `ends_at`, `location`.
 - **AccuWeather: el cielo ha cambiado** (`condition_changed`) — las
   condiciones actuales han cambiado, por ejemplo de despejado a lluvia.
-  Filtre por la nueva condición. Variables: `condition`,
+  Filtre por la nueva condición. La niebla a 0 °C o menos se indica como
+  niebla helada, y una tormenta que cae en forma de nieve como nieve con
+  tormenta; de noche, la condición sigue siendo la real (despejado,
+  lluvia…), nunca una «noche» genérica. Variables: `condition`,
   `previous_condition`, `description`, `temperature` (°C), `location`.
 - **AccuWeather: lluvia prevista** (`rain_expected`) — se prevé precipitación
   en las próximas 3 horas, cuando en la actualización anterior no la había.
