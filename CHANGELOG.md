@@ -9,6 +9,8 @@ section under the version it ships, and the section becomes the notes of the Git
 
 ## [Unreleased]
 
+- Update `@gladysassistant/integration-sdk` to 0.16.1 (security update).
+
 ## [0.1.2] - 2026-11-16
 
 - Maintenance release, no functional change.
