@@ -9,6 +9,10 @@ section under the version it ships, and the section becomes the notes of the Git
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-11-16
+
+- Maintenance release, no functional change.
+
 ## [0.1.3] - 2026-11-16
 
 - Update `@gladysassistant/integration-sdk` to 0.16.1 (security update).
@@ -67,7 +71,8 @@ section under the version it ships, and the section becomes the notes of the Git
 - `SECURITY.md`, `CLAUDE.md`, CI (Node 22 and 24, store checks, Docker build), Release, Build and
   GitHub releases workflows, Dependabot.
 
-[Unreleased]: https://github.com/prohand/gladys-accuweather/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/prohand/gladys-accuweather/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/prohand/gladys-accuweather/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/prohand/gladys-accuweather/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/prohand/gladys-accuweather/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/prohand/gladys-accuweather/compare/v0.1.0...v0.1.1
